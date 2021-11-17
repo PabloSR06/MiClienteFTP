@@ -10,6 +10,8 @@ public class ConexionProperty {
 	private StringProperty user = new SimpleStringProperty();
 	private StringProperty password = new SimpleStringProperty();
 	
+	private StringProperty directorio = new SimpleStringProperty();
+	
 	
 
 	public final StringProperty serverNameProperty() {
@@ -70,6 +72,24 @@ public class ConexionProperty {
 	public final void setPassword(final String password) {
 		this.passwordProperty().set(password);
 	}
+
+
+	public final StringProperty directorioProperty() {
+		return this.directorio;
+	}
+	
+
+
+	public final String getDirectorio() {
+		return this.directorioProperty().get();
+	}
+	
+
+
+	public final void setDirectorio(final String directorio) {
+		this.directorioProperty().set(directorio);
+	}
+	
 	
 	
 	

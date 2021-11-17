@@ -1,8 +1,15 @@
 package dad.miclienteftp.controller;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.SocketException;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.ResourceBundle;
+
+import org.apache.commons.net.ftp.FTPClient;
+import org.apache.commons.net.ftp.FTPFile;
 
 import dad.miclienteftp.model.ConexionProperty;
 import javafx.event.ActionEvent;
@@ -18,14 +25,13 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 public class ConectionController implements Initializable {
-	
-	//MODEL
-	private Stage stage;
-	
-	private ConexionProperty property;
 
-	
-	//VIEW	
+	// MODEL
+	private Stage stage;
+
+	public ConexionProperty property = new ConexionProperty();
+
+	// VIEW
 
 	@FXML
 	private Button cancelarButton;
@@ -48,7 +54,14 @@ public class ConectionController implements Initializable {
 	@FXML
 	private TextField userText;
 
-	public ConectionController(){
+	private static  FTPClient cliente = new FTPClient();
+
+	public static FTPClient getClient() {
+		return cliente;
+	}
+
+
+	public ConectionController() {
 		try {
 			FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/conexion.fxml"));
 			loader.setController(this);
@@ -61,11 +74,8 @@ public class ConectionController implements Initializable {
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 
-		property.serverNameProperty().bindBidirectional(serverText.textProperty());
-		property.portProperty().bindBidirectional(portText.textProperty());
+		
 	}
-	
-
 
 	@FXML
 	void onCancelarAction(ActionEvent event) {
@@ -74,7 +84,25 @@ public class ConectionController implements Initializable {
 
 	@FXML
 	void onConectAction(ActionEvent event) {
+
+		try {
+			cliente.connect("ftp.rediris.es", 21);
+			cliente.login("", "");
+			cliente.changeWorkingDirectory("/debian/dists");
+			property.setDirectorio(cliente.printWorkingDirectory());
+
+			//FTPFile[] ficheros = cliente.listFiles();
+
+			cliente.changeWorkingDirectory("..");
+
+		} catch (SocketException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 		
+		
+		stage.close();
 	}
 
 	public GridPane getView() {
@@ -88,6 +116,6 @@ public class ConectionController implements Initializable {
 		stage.initOwner(primaryStage);
 		stage.setScene(new Scene(conexion, 400, 200));
 		stage.showAndWait();
-		
+
 	}
 }
