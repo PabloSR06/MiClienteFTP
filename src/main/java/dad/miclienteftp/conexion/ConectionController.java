@@ -13,6 +13,7 @@ import org.apache.commons.net.ftp.FTPFile;
 
 import dad.miclienteftp.main.App;
 import dad.miclienteftp.servidor.Controller;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -31,6 +32,10 @@ public class ConectionController implements Initializable {
 	private Stage stage;
 
 	private ConexionProperty model = new ConexionProperty();
+	
+	private static ConectadoProperty conectado = new ConectadoProperty();
+	
+	private static  FTPClient cliente = new FTPClient();
 
 	// VIEW
 
@@ -55,12 +60,6 @@ public class ConectionController implements Initializable {
 	@FXML
 	private TextField userText;
 
-	private static  FTPClient cliente = new FTPClient();
-
-	public static FTPClient getClient() {
-		return cliente;
-	}
-
 
 	public ConectionController() {
 		try {
@@ -74,8 +73,12 @@ public class ConectionController implements Initializable {
 
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
+		serverText.textProperty().set("ftp.rediris.es");
 
 		model.serverProperty().bindBidirectional(serverText.textProperty());
+		//model.portProperty().bind(null);
+		model.userProperty().bindBidirectional(userText.textProperty());
+		model.passwordProperty().bindBidirectional(passwordText.textProperty());
 
 	}
 
@@ -91,25 +94,19 @@ public class ConectionController implements Initializable {
 			cliente.connect("ftp.rediris.es", 21);
 			cliente.login("", "");
 			cliente.changeWorkingDirectory("/debian/dists");
-			System.out.println(cliente.printWorkingDirectory());
-			
 
-			//FTPFile[] ficheros = cliente.listFiles();
 
 			cliente.changeWorkingDirectory("..");
-			System.out.println(cliente.printWorkingDirectory());
 			
-			App.info("Conexion" , "Se ha conectado correctamente a" + cliente.getLocalPort());
+			conectado.setConectado(cliente.isConnected());
+			
+			App.info("Conexion" , "Se ha conectado correctamente: " + model.getServer());
 			
 			Controller.listar();
 
-
-		} catch (SocketException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+		} catch (Exception e) {
+			App.error("No se ha podido conectar: " + model.getServer());
 		}
-		
 		
 		stage.close();
 	}
@@ -127,8 +124,14 @@ public class ConectionController implements Initializable {
 		stage.showAndWait();
 
 	}
+	public static FTPClient getClient() {
+		return cliente;
+	}
 	
 	public ConexionProperty getModel() {
 		return model;	
+	}
+	public static ConectadoProperty getConectedModel() {
+		return conectado;	
 	}
 }

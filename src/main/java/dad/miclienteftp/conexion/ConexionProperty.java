@@ -1,6 +1,5 @@
 package dad.miclienteftp.conexion;
 
-
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
@@ -12,6 +11,7 @@ public class ConexionProperty {
 	private IntegerProperty port = new SimpleIntegerProperty();
 	private StringProperty user = new SimpleStringProperty();
 	private StringProperty password = new SimpleStringProperty();
+	
 	public final StringProperty serverProperty() {
 		return this.server;
 	}

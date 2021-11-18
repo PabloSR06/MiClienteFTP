@@ -10,6 +10,7 @@ import java.util.ResourceBundle;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 
+import dad.miclienteftp.conexion.ConectadoProperty;
 import dad.miclienteftp.conexion.ConectionController;
 import dad.miclienteftp.conexion.ConexionProperty;
 import dad.miclienteftp.main.App;
@@ -45,6 +46,7 @@ public class Controller implements Initializable {
 
 	// MODEL
 	private ConexionProperty ConexionProperty = new ConexionProperty();
+	private static ConectadoProperty conectado = ConectionController.getConectedModel();
 
 	private RootModel model = new RootModel();
 
@@ -101,9 +103,26 @@ public class Controller implements Initializable {
 
 		nameColumn.setCellValueFactory(v -> v.getValue().nombreFileProperty());
 
-		// sizeColumn.setCellValueFactory(v -> v.getValue().sizeFileProperty());
+		sizeColumn.setCellValueFactory(v -> v.getValue().sizeFileProperty());
 
 		tipeColumn.setCellValueFactory(v -> v.getValue().tipeFileProperty());
+	
+		
+		//bloquear botones
+		//disconectMenu.setDisable(true);
+		
+		conectado.conectadoProperty().addListener((o, ov, nv) -> {
+			System.out.println("o" + o.getValue());
+			//disconectMenu.setDisable(!ov);
+			//conectMenu.setDisable(ov);
+			if (ov == true ) {
+				try {
+					directorioLabel.textProperty().set(cliente.printWorkingDirectory());
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		});
 
 	}
 
@@ -138,14 +157,12 @@ public class Controller implements Initializable {
 		try {
 			ficheros = cliente.listFiles();
 
-
 			Arrays.stream(ficheros).forEach(fichero -> {
 				tabla.addAll(new FTP(fichero.getName(), fichero.getSize(), FILE_TYPE.get(fichero.getType())));	
 			});
 
 			System.out.println(cliente.printWorkingDirectory());
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 
@@ -158,7 +175,16 @@ public class Controller implements Initializable {
 	}
 
 	@FXML
-	void onDisconectAction(ActionEvent event) throws IOException {
+	void onDisconectAction(ActionEvent event){
+		
+		try {
+			cliente.disconnect();
+			conectado.conectadoProperty().setValue(false);
+			tabla.clear();
+		} catch (IOException e) {
+			// TODO: handle exception
+		}
+		
 	}
 
 	public VBox getView() {
