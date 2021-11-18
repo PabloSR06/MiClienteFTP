@@ -1,7 +1,10 @@
 package dad.miclienteftp.main;
 
-import dad.miclienteftp.controller.Controller;
+import dad.miclienteftp.conexion.ConectionController;
+import dad.miclienteftp.servidor.Controller;
 import javafx.application.Application;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
@@ -9,18 +12,25 @@ import javafx.stage.Stage;
 
 public class App extends Application {
 	
+	private ConectionController controllerConexion;
 	private Controller controller;
 	private static Stage primaryStage;
+	
+	//model
+	private StringProperty valor = new SimpleStringProperty();
 
 	@Override
 	public void start(Stage primaryStage) throws Exception {
 		controller = new Controller();
+		controllerConexion = new ConectionController();
 		
 		Scene scene = new Scene(controller.getView());
 		
 		primaryStage.setScene(scene);
 		primaryStage.setTitle("Mi Cliente FTP");
 		primaryStage.show();
+		
+		
 
 	}
 	public static Stage getPrimaryStage() {

@@ -1,4 +1,4 @@
-package dad.miclienteftp.controller;
+package dad.miclienteftp.conexion;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -11,7 +11,8 @@ import java.util.ResourceBundle;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPFile;
 
-import dad.miclienteftp.model.ConexionProperty;
+import dad.miclienteftp.main.App;
+import dad.miclienteftp.servidor.Controller;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -29,7 +30,7 @@ public class ConectionController implements Initializable {
 	// MODEL
 	private Stage stage;
 
-	public ConexionProperty property = new ConexionProperty();
+	private ConexionProperty model = new ConexionProperty();
 
 	// VIEW
 
@@ -74,7 +75,8 @@ public class ConectionController implements Initializable {
 	@Override
 	public void initialize(URL location, ResourceBundle resources) {
 
-		
+		model.serverProperty().bindBidirectional(serverText.textProperty());
+
 	}
 
 	@FXML
@@ -89,11 +91,18 @@ public class ConectionController implements Initializable {
 			cliente.connect("ftp.rediris.es", 21);
 			cliente.login("", "");
 			cliente.changeWorkingDirectory("/debian/dists");
-			property.setDirectorio(cliente.printWorkingDirectory());
+			System.out.println(cliente.printWorkingDirectory());
+			
 
 			//FTPFile[] ficheros = cliente.listFiles();
 
 			cliente.changeWorkingDirectory("..");
+			System.out.println(cliente.printWorkingDirectory());
+			
+			App.info("Conexion" , "Se ha conectado correctamente a" + cliente.getLocalPort());
+			
+			Controller.listar();
+
 
 		} catch (SocketException e) {
 			e.printStackTrace();
@@ -117,5 +126,9 @@ public class ConectionController implements Initializable {
 		stage.setScene(new Scene(conexion, 400, 200));
 		stage.showAndWait();
 
+	}
+	
+	public ConexionProperty getModel() {
+		return model;	
 	}
 }
