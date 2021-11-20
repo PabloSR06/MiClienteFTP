@@ -13,7 +13,9 @@ import org.apache.commons.net.ftp.FTPFile;
 
 import dad.miclienteftp.main.App;
 import dad.miclienteftp.servidor.Controller;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -25,6 +27,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.util.converter.NumberStringConverter;
 
 public class ConectionController implements Initializable {
 
@@ -32,10 +35,12 @@ public class ConectionController implements Initializable {
 	private Stage stage;
 
 	private ConexionProperty model = new ConexionProperty();
-	
+
 	private static ConectadoProperty conectado = new ConectadoProperty();
-	
-	private static  FTPClient cliente = new FTPClient();
+
+	private static FTPClient cliente;
+
+	private ObjectProperty<FTPClient> ftp = new SimpleObjectProperty<FTPClient>();
 
 	// VIEW
 
@@ -60,7 +65,6 @@ public class ConectionController implements Initializable {
 	@FXML
 	private TextField userText;
 
-
 	public ConectionController() {
 		try {
 			FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/conexion.fxml"));
@@ -76,7 +80,7 @@ public class ConectionController implements Initializable {
 		serverText.textProperty().set("ftp.rediris.es");
 
 		model.serverProperty().bindBidirectional(serverText.textProperty());
-		//model.portProperty().bind(null);
+		portText.textProperty().bindBidirectional(model.portProperty(), new NumberStringConverter());
 		model.userProperty().bindBidirectional(userText.textProperty());
 		model.passwordProperty().bindBidirectional(passwordText.textProperty());
 
@@ -91,23 +95,20 @@ public class ConectionController implements Initializable {
 	void onConectAction(ActionEvent event) {
 
 		try {
+			cliente = new FTPClient();
 			cliente.connect("ftp.rediris.es", 21);
 			cliente.login("", "");
-			cliente.changeWorkingDirectory("/debian/dists");
-
-
-			cliente.changeWorkingDirectory("..");
 			
+			ftp.set(cliente);
+
 			conectado.setConectado(cliente.isConnected());
-			
-			App.info("Conexion" , "Se ha conectado correctamente: " + model.getServer());
-			
-			Controller.listar();
+
+			App.info("Conexion", "Se ha conectado correctamente: " + model.getServer());
 
 		} catch (Exception e) {
 			App.error("No se ha podido conectar: " + model.getServer());
 		}
-		
+
 		stage.close();
 	}
 
@@ -115,23 +116,30 @@ public class ConectionController implements Initializable {
 		return conexion;
 	}
 
-	public void showOnStage(Stage primaryStage) {
+	public void showOnStage() {
 		stage = new Stage();
 		stage.setTitle("Iniciar Sesion");
 		stage.initModality(Modality.APPLICATION_MODAL);
-		stage.initOwner(primaryStage);
+		stage.initOwner(App.getPrimaryStage());
 		stage.setScene(new Scene(conexion, 400, 200));
 		stage.showAndWait();
 
 	}
-	public static FTPClient getClient() {
-		return cliente;
+
+	public final ObjectProperty<FTPClient> ftpProperty() {
+		return this.ftp;
 	}
 	
-	public ConexionProperty getModel() {
-		return model;	
+
+	public final FTPClient getFtp() {
+		return this.ftpProperty().get();
 	}
-	public static ConectadoProperty getConectedModel() {
-		return conectado;	
+	
+
+	public final void setFtp(final FTPClient ftp) {
+		this.ftpProperty().set(ftp);
 	}
+	
+
+	
 }
