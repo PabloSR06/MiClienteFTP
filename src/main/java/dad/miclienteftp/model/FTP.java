@@ -1,6 +1,10 @@
 package dad.miclienteftp.model;
 
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.apache.commons.net.ftp.FTPFile;
 
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.LongProperty;
@@ -13,7 +17,16 @@ import javafx.beans.property.StringProperty;
 
 public class FTP {
 	
-	private ObjectProperty<File> fichero = new SimpleObjectProperty<>();
+	@SuppressWarnings("serial")
+	public static final Map<Integer, String> FILE_TYPE = new HashMap<Integer, String>() {
+		{
+			put(FTPFile.DIRECTORY_TYPE, "Directorio");
+			put(FTPFile.FILE_TYPE, "Fichero");
+			put(FTPFile.SYMBOLIC_LINK_TYPE, "Enlace");
+		}
+	};
+	
+	private ObjectProperty<FTPFile> fichero = new SimpleObjectProperty<>();
 	
 	private StringProperty nombreFile = new SimpleStringProperty();
 	
@@ -21,23 +34,24 @@ public class FTP {
 	
 	private StringProperty tipeFile= new SimpleStringProperty();
 	
-	public FTP(String a, long b, String c) {
-        this.nombreFile = new SimpleStringProperty(a);
-        this.sizeFile = new SimpleLongProperty(b);
-        this.tipeFile = new SimpleStringProperty(c);
+	public FTP(FTPFile file) {
+		setNombreFile(file.getName());
+		setSizeFile(file.getSize());
+		setTipeFile(FILE_TYPE.get(file.getType()));
+        
     }
 
-	public final ObjectProperty<File> ficheroProperty() {
+	public final ObjectProperty<FTPFile> ficheroProperty() {
 		return this.fichero;
 	}
 	
 
-	public final File getFichero() {
+	public final FTPFile getFichero() {
 		return this.ficheroProperty().get();
 	}
 	
 
-	public final void setFichero(final File fichero) {
+	public final void setFichero(final FTPFile fichero) {
 		this.ficheroProperty().set(fichero);
 	}
 	
@@ -86,5 +100,7 @@ public class FTP {
 		this.tipeFileProperty().set(tipeFile);
 	}
 	
+	
+
 
 }
