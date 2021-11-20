@@ -1,5 +1,6 @@
 package dad.miclienteftp.servidor;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
@@ -32,6 +33,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableRow;
 import javafx.scene.control.TableView;
 import javafx.scene.layout.BorderPane;
 //import javafx.stage.DirectoryChooser;
@@ -52,6 +54,9 @@ public class Controller implements Initializable {
 
 	private static ListProperty<FTP> tabla = new SimpleListProperty<>(FXCollections.observableArrayList());
 	private ObjectProperty<FTP> seleccionado = new SimpleObjectProperty<>();
+	
+	private static StringProperty ruta = new SimpleStringProperty();
+
 
 	// VIEW
 
@@ -74,7 +79,7 @@ public class Controller implements Initializable {
 	private TableColumn<FTP, String> nameColumn;
 
 	@FXML
-	private TableColumn<FTP, Long> sizeColumn;
+	private TableColumn<FTP, Number> sizeColumn;
 
 	@FXML
 	private Menu stateMenu;
@@ -85,7 +90,8 @@ public class Controller implements Initializable {
 	@FXML
 	private VBox view;
 
-	private static FTPClient cliente = ConectionController.getClient();
+	private static FTPClient cliente;
+	private ObjectProperty<FTPClient> ftpC = new SimpleObjectProperty<FTPClient>();
 
 	public Controller() throws IOException {
 		FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/servidor.fxml"));
@@ -100,6 +106,8 @@ public class Controller implements Initializable {
 		seleccionado.bind(fileTable.getSelectionModel().selectedItemProperty());
 
 		fileTable.itemsProperty().bind(tabla);
+		
+		
 
 		nameColumn.setCellValueFactory(v -> v.getValue().nombreFileProperty());
 
@@ -107,7 +115,8 @@ public class Controller implements Initializable {
 
 		tipeColumn.setCellValueFactory(v -> v.getValue().tipeFileProperty());
 	
-		
+		ruta.set(new File (".").getAbsolutePath());
+
 		//bloquear botones
 		//disconectMenu.setDisable(true);
 		
@@ -123,42 +132,42 @@ public class Controller implements Initializable {
 				}
 			}
 		});
+		
+		
+//		fileTable.setRowFactory( tv -> {
+//		    TableRow<FTP> row = new TableRow<>();
+//		    row.setOnMouseClicked(event -> {
+//		        if (event.getClickCount() == 2 && (! row.isEmpty()) ) {
+//		    		listar(row.getItem().getFichero());
+//		        	System.out.println("holas");
+//		        }
+//		    });
+//		    return row;
+//		});
 
 	}
 
-	@SuppressWarnings("serial")
-	public static final Map<Integer, String> FILE_TYPE = new HashMap<Integer, String>() {
-		{
-			put(FTPFile.DIRECTORY_TYPE, "Directorio");
-			put(FTPFile.FILE_TYPE, "Fichero");
-			put(FTPFile.SYMBOLIC_LINK_TYPE, "Enlace");
-		}
-	};
+	
 
 	@FXML
 	void onDownloadAction(ActionEvent event) throws IOException {
-//    	File fichero = fileChooser.showSaveDialog(App.getPrimaryStage());
-//		if (fichero != null) {
-//			try {
-//				getFxModel().save(fichero);
-//			} catch (Exception e1) {
-//				CodeGenApp.error("Error al guardar el modelo FX en el fichero '" + fichero.getName() + "'.",
-//						e1.getMessage());
-//			}
-//		}
-		// directorioLabel.setText(ConectionController.getCliente().printWorkingDirectory());
+
 
 	}
 
-	public static void listar() {
+	public static void listar(File f) {
+		
+		f = new File(ruta.get());
 		tabla.clear();
+		System.out.println(ruta);
+		//cliente.changeWorkingDirectory(null);
 
 		FTPFile[] ficheros;
 		try {
 			ficheros = cliente.listFiles();
 
 			Arrays.stream(ficheros).forEach(fichero -> {
-				tabla.addAll(new FTP(fichero.getName(), fichero.getSize(), FILE_TYPE.get(fichero.getType())));	
+				tabla.add(new FTP(fichero));	
 			});
 
 			System.out.println(cliente.printWorkingDirectory());
@@ -171,7 +180,7 @@ public class Controller implements Initializable {
 	@FXML
 	void onConectAction(ActionEvent event) {
 		ConectionController controller = new ConectionController();
-		controller.showOnStage(App.getPrimaryStage());
+		controller.showOnStage();
 	}
 
 	@FXML
